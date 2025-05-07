@@ -5,9 +5,10 @@ import type {
   LatLngLiteral,
   LeafletMouseEvent,
   Map as LeafletMap,
-} from 'leaflet'
-import 'leaflet/dist/leaflet.css'
-import React, { useEffect, useState } from 'react'
+} from "leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import React, { useEffect, useState } from "react";
 import {
   ImageOverlay,
   ImageOverlayProps,
@@ -17,34 +18,34 @@ import {
   TileLayerProps,
   WMSTileLayer,
   WMSTileLayerProps,
-} from 'react-leaflet'
-import Measure from 'react-measure'
-import './styles/markers.css'
-import { ExpoLeafletProps } from './ExpoLeaflet.types'
-import { MapMarkers } from './MapMarkers'
-import { MapShapes } from './MapShapes'
-import { MapLayer } from './model'
+} from "react-leaflet";
+import Measure from "react-measure";
+import "./styles/markers.css";
+import { ExpoLeafletProps } from "./ExpoLeaflet.types";
+import { MapMarkers } from "./MapMarkers";
+import { MapShapes } from "./MapShapes";
+import { MapLayer } from "./model";
 
-const { BaseLayer, Overlay } = LayersControl
+const { BaseLayer, Overlay } = LayersControl;
 
 interface MapLayersProps {
-  mapLayers: Array<MapLayer>
+  mapLayers: Array<MapLayer>;
 }
 
 const Layer = (props: MapLayer): JSX.Element => {
   switch (props.layerType) {
-    case 'ImageOverlay':
-      return <ImageOverlay {...(props as ImageOverlayProps)} />
-    case 'WMSTileLayer':
-      return <WMSTileLayer {...(props as WMSTileLayerProps)} />
+    case "ImageOverlay":
+      return <ImageOverlay {...(props as ImageOverlayProps)} />;
+    case "WMSTileLayer":
+      return <WMSTileLayer {...(props as WMSTileLayerProps)} />;
     default:
-      return <TileLayer {...(props as TileLayerProps)} />
+      return <TileLayer {...(props as TileLayerProps)} />;
   }
-}
+};
 
 const MapLayers = (props: MapLayersProps) => {
-  const { mapLayers } = props
-  const Wrap = mapLayers.length > 1 ? LayersControl : React.Fragment
+  const { mapLayers } = props;
+  const Wrap = mapLayers.length > 1 ? LayersControl : React.Fragment;
   return (
     <Wrap>
       {mapLayers.map((layer: MapLayer, index: number): JSX.Element => {
@@ -59,43 +60,43 @@ const MapLayers = (props: MapLayersProps) => {
             </BaseLayer>
           );
         } else if (layer.baseLayerName && !layer.baseLayer) {
-            return (
-              <Overlay
-                key={`layer-${index}`}
-                checked={layer.baseLayerIsChecked || false}
-                name={layer.baseLayerName || `Layer.${index}`}
-              >
-                <Layer {...layer} />
+          return (
+            <Overlay
+              key={`layer-${index}`}
+              checked={layer.baseLayerIsChecked || false}
+              name={layer.baseLayerName || `Layer.${index}`}
+            >
+              <Layer {...layer} />
             </Overlay>
-            );
+          );
         } else {
-          return <Layer key={`layer-${index}`} {...layer} />
+          return <Layer key={`layer-${index}`} {...layer} />;
         }
       })}
     </Wrap>
-  )
-}
+  );
+};
 
 const toLatLngLiteral = (latLng: LatLng): LatLngLiteral => {
   return {
     lat: latLng?.lat,
     lng: latLng?.lng,
-  }
-}
+  };
+};
 
 const bounds = (map?: LeafletMap | null): LatLngBoundsLiteral => {
-  const bound = map?.getBounds()!
-  const northEast = bound?.getNorthEast()
-  const southWest = bound?.getSouthWest()
+  const bound = map?.getBounds()!;
+  const northEast = bound?.getNorthEast();
+  const southWest = bound?.getSouthWest();
   return [
     [northEast?.lat, northEast?.lng],
     [southWest?.lat, southWest?.lng],
-  ]
-}
+  ];
+};
 
 const center = (map?: LeafletMap | null): LatLngLiteral => {
-  return toLatLngLiteral(map?.getCenter()!)
-}
+  return toLatLngLiteral(map?.getCenter()!);
+};
 
 export const MapComponent = (props: ExpoLeafletProps) => {
   const {
@@ -105,28 +106,28 @@ export const MapComponent = (props: ExpoLeafletProps) => {
     mapShapes = [],
     onMessage,
     zoom = 13,
-  } = props
-  const [dimensions, setDimensions] = useState({ height: 0, width: 0 })
-  const [mapRef, setMapRef] = useState<LeafletMap | null>(null)
+  } = props;
+  const [dimensions, setDimensions] = useState({ height: 0, width: 0 });
+  const [mapRef, setMapRef] = useState<LeafletMap | null>(null);
   useEffect(() => {
     if (props.mapCenterPosition || props.zoom) {
       props.onMessage({
-        tag: 'DebugMessage',
+        tag: "DebugMessage",
         message: `Flying to ${props.mapCenterPosition.lat},${props.mapCenterPosition.lng} ${props.zoom}`,
-      })
+      });
       mapRef?.flyTo(
         [props.mapCenterPosition.lat, props.mapCenterPosition.lng],
-        props.zoom,
-      )
+        props.zoom
+      );
     }
-  }, [props.mapCenterPosition?.lat, props.mapCenterPosition?.lng, props.zoom])
+  }, [props.mapCenterPosition?.lat, props.mapCenterPosition?.lng, props.zoom]);
   return (
     <Measure
       bounds
       onResize={(contentRect) => {
         if (contentRect.bounds) {
-          const { height, width } = contentRect.bounds
-          setDimensions({ height, width })
+          const { height, width } = contentRect.bounds;
+          setDimensions({ height, width });
         }
       }}
     >
@@ -135,7 +136,7 @@ export const MapComponent = (props: ExpoLeafletProps) => {
           ref={measureRef}
           id="map-container"
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: 0,
             bottom: 0,
             backgroundColor: props.backgroundColor,
@@ -145,105 +146,106 @@ export const MapComponent = (props: ExpoLeafletProps) => {
         >
           {dimensions.height > 0 && (
             <MapContainer
+              crs={L.CRS.Simple}
               {...props.mapOptions}
               whenCreated={(map: LeafletMap) => {
-                setMapRef(map)
+                setMapRef(map);
                 map.addEventListener({
                   click: (event: LeafletMouseEvent) => {
-                    const { latlng } = event
+                    const { latlng } = event;
                     onMessage({
-                      tag: 'onMapClicked',
+                      tag: "onMapClicked",
                       location: toLatLngLiteral(latlng),
-                    })
+                    });
                   },
                   move: () => {
                     onMessage({
-                      tag: 'onMove',
+                      tag: "onMove",
                       bounds: bounds(map),
                       mapCenter: center(map),
                       zoom: map.getZoom()!,
-                    })
+                    });
                   },
                   moveend: () => {
                     onMessage({
-                      tag: 'onMoveEnd',
+                      tag: "onMoveEnd",
                       bounds: bounds(map),
                       mapCenter: center(map),
                       zoom: map.getZoom()!,
-                    })
+                    });
                   },
                   movestart: () => {
                     onMessage({
-                      tag: 'onMoveStart',
+                      tag: "onMoveStart",
                       bounds: bounds(map),
                       mapCenter: center(map),
                       zoom: map.getZoom()!,
-                    })
+                    });
                   },
                   resize: () => {
                     onMessage({
-                      tag: 'onResize',
+                      tag: "onResize",
                       bounds: bounds(mapRef),
                       mapCenter: center(mapRef),
                       zoom: mapRef?.getZoom()!,
-                    })
+                    });
                   },
                   unload: () => {
                     onMessage({
-                      tag: 'onUnload',
+                      tag: "onUnload",
                       bounds: bounds(mapRef),
                       mapCenter: center(mapRef),
                       zoom: mapRef?.getZoom()!,
-                    })
+                    });
                   },
                   zoom: () => {
                     onMessage({
-                      tag: 'onZoom',
+                      tag: "onZoom",
                       bounds: bounds(map),
                       mapCenter: center(map),
                       zoom: mapRef?.getZoom()!,
-                    })
+                    });
                   },
                   zoomend: () => {
                     onMessage({
-                      tag: 'onZoomEnd',
+                      tag: "onZoomEnd",
                       bounds: bounds(map),
                       mapCenter: center(map),
                       zoom: mapRef?.getZoom()!,
-                    })
+                    });
                   },
                   zoomlevelschange: () => {
                     onMessage({
-                      tag: 'onZoomLevelsChange',
+                      tag: "onZoomLevelsChange",
                       bounds: bounds(mapRef),
                       mapCenter: center(mapRef),
                       zoom: mapRef?.getZoom()!,
-                    })
+                    });
                   },
                   zoomstart: () => {
                     onMessage({
-                      tag: 'onZoomStart',
+                      tag: "onZoomStart",
                       bounds: bounds(map),
                       mapCenter: center(map),
                       zoom: mapRef?.getZoom()!,
-                    })
+                    });
                   },
-                })
-                onMessage({ tag: 'MapReady', version: '1.0.2' })
+                });
+                onMessage({ tag: "MapReady", version: "1.0.2" });
               }}
               center={mapCenterPosition as LatLngExpression}
               maxZoom={props.maxZoom ?? 20}
               zoom={zoom}
-              style={{ width: '100%', height: dimensions.height }}
+              style={{ width: "100%", height: dimensions.height }}
             >
               <MapLayers mapLayers={mapLayers} />
               <MapMarkers
                 mapMarkers={mapMarkers}
                 onClick={(mapMarkerId) => {
                   onMessage({
-                    tag: 'onMapMarkerClicked',
+                    tag: "onMapMarkerClicked",
                     mapMarkerId,
-                  })
+                  });
                 }}
               />
               <MapShapes mapShapes={mapShapes} />
@@ -252,5 +254,5 @@ export const MapComponent = (props: ExpoLeafletProps) => {
         </div>
       )}
     </Measure>
-  )
-}
+  );
+};
